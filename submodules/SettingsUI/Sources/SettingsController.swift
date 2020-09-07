@@ -232,8 +232,7 @@ private indirect enum SettingsEntry: ItemListNodeEntry {
     #endif
     case watch(PresentationTheme, UIImage?, String, String)
     
-    case askAQuestion(PresentationTheme, UIImage?, String)
-    case faq(PresentationTheme, UIImage?, String)
+    case support(PresentationTheme, UIImage?, String)
     
     var section: ItemListSectionId {
         switch self {
@@ -257,7 +256,7 @@ private indirect enum SettingsEntry: ItemListNodeEntry {
         case .wallet:
             return SettingsSection.advanced.rawValue
         #endif
-        case .askAQuestion, .faq:
+        case .support:
             return SettingsSection.help.rawValue
         }
     }
@@ -312,10 +311,8 @@ private indirect enum SettingsEntry: ItemListNodeEntry {
             return 1016
         case .watch:
             return 1017
-        case .askAQuestion:
+        case .support:
             return 1018
-        case .faq:
-            return 1019
         }
     }
     
@@ -493,18 +490,12 @@ private indirect enum SettingsEntry: ItemListNodeEntry {
                 } else {
                     return false
                 }
-            case let .askAQuestion(lhsTheme, lhsImage, lhsText):
-                if case let .askAQuestion(rhsTheme, rhsImage, rhsText) = rhs, lhsTheme === rhsTheme, lhsImage === rhsImage, lhsText == rhsText {
-                    return true
-                } else {
-                    return false
-                }
-            case let .faq(lhsTheme, lhsImage, lhsText):
-                if case let .faq(rhsTheme, rhsImage, rhsText) = rhs, lhsTheme === rhsTheme, lhsImage === rhsImage, lhsText == rhsText {
-                    return true
-                } else {
-                    return false
-                }
+        case let .support(lhsTheme, lhsImage, lhsText):
+            if case let .support(rhsTheme, rhsImage, rhsText) = rhs, lhsTheme === rhsTheme, lhsImage === rhsImage, lhsText == rhsText {
+                return true
+            } else {
+                return false
+            }
         }
     }
     
@@ -630,18 +621,15 @@ private indirect enum SettingsEntry: ItemListNodeEntry {
                     arguments.openWallet()
                 })
             #endif
-            case let .watch(theme, image, text, value):
-                return ItemListDisclosureItem(presentationData: presentationData, icon: image, title: text, label: value, sectionId: ItemListSectionId(self.section), style: .blocks, action: {
-                    arguments.openWatch()
-                }, clearHighlightAutomatically: false)
-            case let .askAQuestion(theme, image, text):
-                return ItemListDisclosureItem(presentationData: presentationData, icon: image, title: text, label: "", sectionId: ItemListSectionId(self.section), style: .blocks, action: {
-                    arguments.openSupport()
-                })
-            case let .faq(theme, image, text):
-                return ItemListDisclosureItem(presentationData: presentationData, icon: image, title: text, label: "", sectionId: ItemListSectionId(self.section), style: .blocks, action: {
-                    arguments.openFaq(nil)
-                }, clearHighlightAutomatically: false)
+        case let .watch(theme, image, text, value):
+            return ItemListDisclosureItem(presentationData: presentationData, icon: image, title: text, label: value, sectionId: ItemListSectionId(self.section), style: .blocks, action: {
+                arguments.openWatch()
+            }, clearHighlightAutomatically: false)
+        case let .support(theme, image, text):
+            return ItemListDisclosureItem(presentationData: presentationData, icon: image, title: text, label: "", sectionId: ItemListSectionId(self.section), style: .blocks, action: {
+                arguments.openFaq(nil)
+            }, clearHighlightAutomatically: false)
+
         }
     }
 }
@@ -731,8 +719,8 @@ private func settingsEntries(account: Account, presentationData: PresentationDat
             entries.append(.watch(presentationData.theme, PresentationResourcesSettings.watch, presentationData.strings.Settings_AppleWatch, ""))
         }
         
-        entries.append(.askAQuestion(presentationData.theme, PresentationResourcesSettings.support, presentationData.strings.Settings_Support))
-        entries.append(.faq(presentationData.theme, PresentationResourcesSettings.faq, presentationData.strings.Settings_FAQ))
+        // MARK: - iMe -
+        entries.append(.support(presentationData.theme, PresentationResourcesSettings.newSupport, presentationData.strings.Settings_SupportTitle))
     }
     
     return entries
@@ -946,32 +934,7 @@ public func settingsController(context: AccountContext, accountManager: AccountM
     let privacySettings = Promise<AccountPrivacySettings?>(nil)
     
     let enableQRLogin = Promise<Bool>()
-    let enableFilters = Promise<Bool>()
-
-    let openFaq: (Promise<ResolvedUrl>, String?) -> Void = { resolvedUrl, customAnchor in
-        let _ = (contextValue.get()
-        |> deliverOnMainQueue
-        |> take(1)).start(next: { context in
-            let presentationData = context.sharedContext.currentPresentationData.with { $0 }
-            let controller = OverlayStatusController(theme: presentationData.theme, type: .loading(cancelled: nil))
-            presentControllerImpl?(controller, nil)
-            let _ = (resolvedUrl.get()
-            |> take(1)
-            |> deliverOnMainQueue).start(next: { [weak controller] resolvedUrl in
-                controller?.dismiss()
-
-                var resolvedUrl = resolvedUrl
-                if case let .instantView(webPage, _) = resolvedUrl, let customAnchor = customAnchor {
-                    resolvedUrl = .instantView(webPage, customAnchor)
-                }
-                context.sharedContext.openResolvedUrl(resolvedUrl, context: context, urlContext: .generic, navigationController: getNavigationControllerImpl?(), openPeer: { peer, navigation in
-                }, sendFile: nil, sendSticker: nil, present: { controller, arguments in
-                    pushControllerImpl?(controller)
-                }, dismissInput: {}, contentContext: nil)
-            })
-        })
-    }
-    
+    let enableFilters = Promise<Bool>()    
     let resolvedUrl = contextValue.get()
     |> deliverOnMainQueue
     |> mapToSignal { context -> Signal<ResolvedUrl, NoError> in
@@ -1130,32 +1093,8 @@ public func settingsController(context: AccountContext, accountManager: AccountM
         |> take(1)).start(next: { context in
             pushControllerImpl?(watchSettingsController(context: context))
         })
-    }, openSupport: {
-        let _ = (contextValue.get()
-        |> deliverOnMainQueue
-        |> take(1)).start(next: { context in
-            let supportPeer = Promise<PeerId?>()
-            supportPeer.set(supportPeerId(account: context.account))
-            let presentationData = context.sharedContext.currentPresentationData.with { $0 }
-            
-            let resolvedUrlPromise = Promise<ResolvedUrl>()
-            resolvedUrlPromise.set(resolvedUrl)
-            
-            presentControllerImpl?(textAlertController(context: context, title: nil, text: presentationData.strings.Settings_FAQ_Intro, actions: [
-                TextAlertAction(type: .genericAction, title: presentationData.strings.Settings_FAQ_Button, action: {
-                openFaq(resolvedUrlPromise, nil)
-            }), TextAlertAction(type: .defaultAction, title: presentationData.strings.Common_OK, action: {
-                supportPeerDisposable.set((supportPeer.get() |> take(1) |> deliverOnMainQueue).start(next: { peerId in
-                    if let peerId = peerId {
-                        pushControllerImpl?(context.sharedContext.makeChatController(context: context, chatLocation: .peer(peerId), subject: nil, botStart: nil, mode: .standard(previewing: false)))
-                    }
-                }))
-            })]), nil)
-        })
-    }, openFaq: { anchor in
-        let resolvedUrlPromise = Promise<ResolvedUrl>()
-        resolvedUrlPromise.set(resolvedUrl)
-        openFaq(resolvedUrlPromise, anchor)
+    }, openSupport: { }, openFaq: { anchor in
+        pushControllerImpl?(supportSettingsController(context: context))
     }, openEditing: {
         let _ = (contextValue.get()
         |> deliverOnMainQueue

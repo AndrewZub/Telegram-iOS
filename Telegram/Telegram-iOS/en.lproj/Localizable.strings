@@ -548,8 +548,6 @@
 "Notification.Exceptions.NewException.NotificationHeader" = "NOTIFICATIONS";
 "Notification.Exceptions.Sound" = "Sound: %@";
 
-
-
 // Message
 "Message.Photo" = "Photo";
 "Message.Video" = "Video";
@@ -697,6 +695,12 @@
 "Settings.BlockedUsers" = "Blocked Users";
 "Settings.ChatBackground" = "Chat Background";
 "Settings.Support" = "Ask a Question";
+"Settings.SupportTitle" = "Support";
+"Settings.iMeSupport" = "iMe Support";
+"Settings.iMeGroup" = "iMe Group";
+"Settings.iMeChannel" = "iMe Channel";
+"Settings.iMeFAQ" = "iMe FAQ";
+"Settings.iMePrivacyPolicy" = "Privacy Policy";
 "Settings.FAQ" = "Telegram FAQ";
 "Settings.FAQ_URL" = "https://telegram.org/faq#general";
 "Settings.FAQ_Intro" = "Please note that Telegram Support is done by volunteers. We try to respond as quickly as possible, but it may take a while.\n\nPlease take a look at the Telegram FAQ: it has important troubleshooting tips and answers to most questions.";
@@ -711,8 +715,6 @@
 "Notifications.MessageNotificationsSound" = "Sound";
 "Notifications.MessageNotificationsHelp" = "You can set custom notifications for specific users on their Info page.";
 "Notifications.MessageNotificationsExceptionsHelp" = "Set custom notifications for specific users.";
-
-
 
 "Notifications.GroupNotifications" = "GROUP NOTIFICATIONS";
 "Notifications.GroupNotificationsAlert" = "Alert";

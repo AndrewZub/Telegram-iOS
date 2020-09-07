@@ -61,4 +61,12 @@ public struct PresentationResourcesSettings {
     public static let changePhoneNumber = renderIcon(name: "Settings/MenuIcons/ChangePhoneNumber")
     
     public static let websites = renderIcon(name: "Settings/MenuIcons/Websites")
+    
+    // MARK: - iMe -
+    public static let iMeChannel = renderIcon(name: "Settings/MenuIcons/iMeChannel")
+    public static let iMeFAQ = renderIcon(name: "Settings/MenuIcons/iMeFAQ")
+    public static let iMeGroup = renderIcon(name: "Settings/MenuIcons/iMeGroup")
+    public static let iMeSupport = renderIcon(name: "Settings/MenuIcons/iMeSupport")
+    public static let newSupport = renderIcon(name: "Settings/MenuIcons/newSupport")
+    public static let privacyPolicy = renderIcon(name: "Settings/MenuIcons/privacyPolicy")
 }

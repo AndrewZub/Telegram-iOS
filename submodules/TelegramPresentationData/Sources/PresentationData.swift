@@ -610,6 +610,14 @@ public func updatedPresentationData(accountManager: AccountManager, applicationI
                         let stringsValue: PresentationStrings
                         if let localizationSettings = localizationSettings {
                             stringsValue = PresentationStrings(primaryComponent: PresentationStringsComponent(languageCode: localizationSettings.primaryComponent.languageCode, localizedName: localizationSettings.primaryComponent.localizedName, pluralizationRulesCode: localizationSettings.primaryComponent.customPluralizationCode, dict: dictFromLocalization(localizationSettings.primaryComponent.localization)), secondaryComponent: localizationSettings.secondaryComponent.flatMap({ PresentationStringsComponent(languageCode: $0.languageCode, localizedName: $0.localizedName, pluralizationRulesCode: $0.customPluralizationCode, dict: dictFromLocalization($0.localization)) }), groupingSeparator: dateTimeFormat.groupingSeparator)
+                            if localizationSettings.primaryComponent.languageCode == "ru" {
+//                                stringsValue.primaryComponent.dict["Settings.SupportTitle"] = "Поддержка"
+//                                stringsValue.primaryComponent.dict["Settings.iMeSupport"] = "Техподдержка iMe"
+//                                stringsValue.primaryComponent.dict["Settings.iMeGroup"] = "Группа iMe"
+//                                stringsValue.primaryComponent.dict["Settings.iMeChannel"] = "Канал iMe"
+//                                stringsValue.primaryComponent.dict["Settings.iMeFAQ"] = "FAQ iMe"
+//                                stringsValue.primaryComponent.dict["Settings.iMePrivacyPolicy"] = "Политика конфиденциальности"
+                            }
                         } else {
                             stringsValue = defaultPresentationStrings
                         }
